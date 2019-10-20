@@ -19,7 +19,7 @@ def open_vid(vid):
 def open_img():
     # Create a VideoCapture object and read from input file
     # If the input is the camera, pass 0 instead of the video file name
-    cap = cv2.VideoCapture('image.jpg')
+    cap = cv2.VideoCapture('recycling_home.png')
 
     # Check if camera opened successfully
     if (cap.isOpened()== False):
