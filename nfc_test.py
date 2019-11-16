@@ -29,62 +29,58 @@ def open_vid(vid):
 #listen for nfc cards    
 def read_card():
     while True:
-#         pn532 = Pn532_i2c()
-#         pn532.SAMconfigure()
-#         card_data = pn532.read_mifare().get_data()
-#         print(card_data)
 
-
-
-
-        #new stuff - to get actual data from card
         card = Mifare()
         card.SAMconfigure()
         card.set_max_retries(MIFARE_SAFE_RETRIES)
         uid = card.scan_field()
         
-
         if uid:
+            blocksToExplore = [0,1,2,3]
+            dataArray = []
+            for block in blocksToExplore:
+                address = card.mifare_address(1,block)
+                card.mifare_auth_b(address,MIFARE_FACTORY_KEY)
+                data = card.mifare_read(address)
+                card.in_deselect()
+                dataArray.extend([hex(x) for x in data]) #data in array form
             
-            print([hex(i) for i in uid]) #card uid
-            address = card.mifare_address(1,0) #read sector 1 block zero of card
-            card.mifare_auth_b(address,MIFARE_FACTORY_KEY)
-            data = card.mifare_read(address)
-            card.in_deselect() # In case you want to authorize a different sector.
+            try:
+                fiftyFourlocation = dataArray.index('0x6e')+1
+                felocation = dataArray.index('0xfe')
+                dataArray = dataArray[fiftyFourlocation:felocation]
+                newArray = []
+                fatToTrim = "0x"
+                for thoseGuys in dataArray: 
+                    newHex = thoseGuys.replace(fatToTrim,"")
+                    newArray.extend(newHex)
+                s = ""
+                s = s.join(newArray)
+                s = bytes.fromhex(s).decode('ascii')
+            except ValueError:
+                s = "invalid"
+                
+            if s == "cardOne":
+                print("card 1")
+                open_vid("sample.mp4")
+                card = ""
+
+            elif s == "cardTwo":
+                print("card 2")
+                open_vid("trash.mp4")
+                card = ""
             
-            #Example of what the data should look like
-#             hexstr = '9101085402656e48656c6c6f5101085402656e576f726c64'
-#             octets = bytearray.fromhex(hexstr)
-#             print(octets)
-            
-            print(data) #data in bytearray form
-            
-            dataArray = [hex(x) for x in data] #data in array form
-            print(dataArray)
-
-            time.sleep(5)
-            
-            #end of new stuff
-
-
-
-
-#         cardOne = bytearray(b'K\x01\x01\x00\x04\x08\x04W \xdeR')
-#         cardTwo = bytearray(b'K\x01\x01\x00\x04\x08\x04k\x90]\x1b')
-# 
-#         if card_data == cardOne:
-#             print("card 1")
-#             #open_vid("sample.mp4")
-# 
-#         elif card_data == cardTwo:
-#             print("card 2")
-#             #open_vid("trash.mp4")
-# 
-#         else:
-#             print("Card not recognized")
-#             time.sleep(5)
+            elif s == "invalid":
+                print("Invalid card")
+                card = ""
+                time.sleep(2)
+                
+            else:
+                print("Card not recognized")
+                card = ""
+                time.sleep(2)
 
 
 if __name__ == '__main__':
-    #Thread(target = open_img).start()
+    Thread(target = open_img).start()
     Thread(target = read_card).start()
