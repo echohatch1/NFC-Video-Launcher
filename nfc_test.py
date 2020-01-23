@@ -5,7 +5,6 @@ import time
 import os
 from threading import Thread
 import cv2
-import numpy as np
 import json
 
 #OpenCV Implementation
@@ -29,38 +28,48 @@ def open_vid(vid):
 def read_card():
     
     #convert bytearray to hex
-    #cardOneHex = cardOne.hex()
+    #tag1Hex = tag1.hex()
     
     #convert hex to bytearray
-    #bytearray.fromhex(cardOneHex)
+    #bytearray.fromhex(tag1Hex)
     
     #get card data from json file (hex format)
-    data = json.load(open('cardData.json'))
+    data = json.load(open('tagData.json'))
+    
     
     #store data from json files into variables and convert from hex format
-    cardOne = bytearray.fromhex(data["cardOne"])
-    cardTwo = bytearray.fromhex(data["cardTwo"])
+    #tag1 = bytearray.fromhex(data["tag1"][0])
+    #tag2 = bytearray.fromhex(data["tag2"][0])
     
-    #cardOne = bytearray(b'K\x01\x01\x00\x04\x08\x04W \xdeR')
-    #cardTwo = bytearray(b'K\x01\x01\x00\x04\x08\x04k\x90]\x1b')
+    #print (data["tags"][0]["tag1"][0])
+    tag_dictionary = data["tags"][0]
+    #data_length = len(tag_dictionary)
+    
+    #for x in range(1, data_length + 1):
+        #array_length = len(tag_dictionary["tag" + str(x)])
+        #for j in range(0, array_length):
+            #print (tag_dictionary["tag" + str(x)][j])
+    
+    #tag1 = bytearray(b'K\x01\x01\x00\x04\x08\x04W \xdeR')
+    #tag2 = bytearray(b'K\x01\x01\x00\x04\x08\x04k\x90]\x1b')
         
     while True:
         pn532 = Pn532_i2c()
         pn532.SAMconfigure()
 
-        card_data = pn532.read_mifare().get_data()
+        card_data = pn532.read_mifare().get_data().hex()
         
-        if card_data != bytearray(b'K\x00'):
+        if card_data != "4b00":
             
             print(card_data)
         
-            if card_data == cardOne:
+            if card_data in tag_dictionary["tag1"]:
                 print("card 1")
-                open_vid("sample.mp4")      
+                #open_vid("sample.mp4")      
 
-            elif card_data == cardTwo:
+            elif card_data in tag_dictionary["tag2"]:
                 print("card 2")
-                open_vid("trash.mp4")
+                #open_vid("trash.mp4")
 
             else:
                 print("Card not recognized")
@@ -68,5 +77,5 @@ def read_card():
 
 
 if __name__ == '__main__':
-    Thread(target = open_img).start()
+    #Thread(target = open_img).start()
     Thread(target = read_card).start()
