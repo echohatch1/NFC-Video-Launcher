@@ -10,41 +10,72 @@ from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
 
+jsonFile = open("tagData.json", "r") # Open the JSON file for reading
+data = json.load(jsonFile) # Read the JSON into the buffer
+jsonFile.close() # Close the JSON file
+
+tag_dictionary = data["tags"][0]
+combo = ""
+card_data = ""
+
 def window():
     master = Tk()
 
-    master.title("Welcome to TutorialsPoint")
+    master.title("Assign Tags")
     master.geometry('400x400')
     master.configure(background = "white");
     
     lbl = Label(master, text="Choose a tag name to assign and then scan for a tag")
     lbl.grid(column=0, row=0)
-
+    
+    global combo
     combo = Combobox(master)
     combo['values']= ("tag1", "tag2")
     combo.current(0) #set the selected item
     combo.grid(column=0, row=1)
+    #print(combo.get())
 
-    def ok():
-        print ("tag assigned")
+    def assign_card():
+        data["tags"][0][combo.get()].append(card_data)
+        
+        ## Save our changes to JSON file
+        jsonFile = open("tagData.json", "w+")
+        jsonFile.write(json.dumps(data))
+        jsonFile.close()
+        
+        #print(combo.get())
+        print(card_data + " assigned to " + combo.get())
         messagebox.showinfo('Success!', "Tag has been assigned")
            
     def read_card():
-        data = json.load(open('tagData.json'))
+
         card_detected = False
             
         while card_detected == False:
             pn532 = Pn532_i2c()
             pn532.SAMconfigure()
-
+            
+            global card_data
             card_data = pn532.read_mifare().get_data().hex()
             
             if card_data != "4b00":
                 card_detected = True
                 print(card_data)
-                lbl2.configure(text="Tag found with UID: " + card_data)
-                button = Button(master, text="Assign Tag", command=ok)
-                button.grid(column=0, row=4)
+                
+                
+                if card_data in tag_dictionary["tag1"]:
+                    print("Tag already assigned to card 1")
+                    lbl2.configure(text="Tag already assigned to card 1")
+
+                elif card_data in tag_dictionary["tag2"]:
+                    print("Tag already assigned to card 2")
+                    lbl2.configure(text="Tag already assigned to card 2")
+
+                else:
+                    print("Tag not currently assigned")
+                    lbl2.configure(text="Tag found with UID: " + card_data)
+                    button = Button(master, text="Assign Tag", command=assign_card)
+                    button.grid(column=0, row=4)
     
     scanButton = Button(master, text="Scan for Tags", command=read_card)
     scanButton.grid(column=0, row=2)
