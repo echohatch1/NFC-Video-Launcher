@@ -46,7 +46,7 @@ def window():
         
         #print(combo.get())
         print(card_data + " assigned to " + combo.get())
-        messagebox.showinfo('Success!', "Tag has been assigned")
+        messagebox.showinfo('Success!', "Tag has been assigned to " + combo.get())
     
     def unassign_card():
         data["tags"][0][val_unassign].remove(card_data)
@@ -57,7 +57,7 @@ def window():
         jsonFile.close()
         
         print(card_data + " unassigned from " + val_unassign)
-        messagebox.showinfo('Success!', "Tag has been unassigned")
+        messagebox.showinfo('Success!', "Tag has been unassigned from " + val_unassign)
            
     def read_card():
 
