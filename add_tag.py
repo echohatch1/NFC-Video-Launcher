@@ -19,6 +19,7 @@ combo = ""
 card_data = ""
 val_unassign = ""
 
+
 def window():
     master = Tk()
 
@@ -26,15 +27,10 @@ def window():
     master.geometry('400x400')
     master.configure(background = "white");
     
-    lbl = Label(master, text="Choose a tag name to assign and then scan for a tag")
+    lbl = Label(master, text="Scan for tags then choose a tag name to assign")
     lbl.grid(column=0, row=0)
     
-    global combo
-    combo = Combobox(master)
-    combo['values']= ("tag1", "tag2")
-    combo.current(0) #set the selected item
-    combo.grid(column=0, row=1)
-    #print(combo.get())
+    
 
     def assign_card():
         data["tags"][0][combo.get()].append(card_data)
@@ -47,6 +43,8 @@ def window():
         #print(combo.get())
         print(card_data + " assigned to " + combo.get())
         messagebox.showinfo('Success!', "Tag has been assigned to " + combo.get())
+        master.destroy()
+        window()
     
     def unassign_card():
         data["tags"][0][val_unassign].remove(card_data)
@@ -58,12 +56,21 @@ def window():
         
         print(card_data + " unassigned from " + val_unassign)
         messagebox.showinfo('Success!', "Tag has been unassigned from " + val_unassign)
+        master.destroy()
+        window()
+        
+    def scan_button():
+        lbl2.configure(text="Listening for tags...")
+        read_card()
+        
            
     def read_card():
-
+        master.update_idletasks()
+        
         card_detected = False
             
         while card_detected == False:
+            
             pn532 = Pn532_i2c()
             pn532.SAMconfigure()
             
@@ -73,10 +80,19 @@ def window():
             if card_data != "4b00":
                 card_detected = True
                 print(card_data)
+                
+                global combo
+                combo = Combobox(master)
+                combo['values']= ("tag1", "tag2")
+                combo.current(0) #set the selected item
+                combo.grid(column=0, row=3)
+                #print(combo.get())
+                
                 button = Button(master, state=DISABLED, text="Assign Tag", command=assign_card)
                 button.grid(column=0, row=4)
                 button2 = Button(master, state=DISABLED, text="Unassign Tag", command=unassign_card)
                 button2.grid(column=0, row=5)
+                
                 
                 global val_unassign
                 
@@ -84,24 +100,28 @@ def window():
                     print("Tag already assigned to card 1")
                     lbl2.configure(text="Tag already assigned to card 1")
                     val_unassign = "tag1"
+                    combo.grid_forget()
                     button2.config(state="normal")
 
                 elif card_data in tag_dictionary["tag2"]:
                     print("Tag already assigned to card 2")
                     lbl2.configure(text="Tag already assigned to card 2")
                     val_unassign = "tag2"
+                    combo.grid_forget()
                     button2.config(state="normal")
 
                 else:
                     print("Tag not currently assigned")
                     lbl2.configure(text="Tag found with UID: " + card_data)
                     button.config(state="normal")
+                    
+            time.sleep(.1)
     
-    scanButton = Button(master, text="Scan for Tags", command=read_card)
-    scanButton.grid(column=0, row=2)
+    scanButton = Button(master, text="Scan for Tags", command=scan_button)
+    scanButton.grid(column=0, row=1)
     
     lbl2 = Label(master, text="No tags detected")
-    lbl2.grid(column=0, row=3)
+    lbl2.grid(column=0, row=2)
 
     mainloop()
             
