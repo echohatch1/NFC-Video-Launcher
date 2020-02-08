@@ -18,6 +18,7 @@ tag_dictionary = data["tags"][0]
 combo = ""
 card_data = ""
 val_unassign = ""
+list_keys = list(tag_dictionary.keys())
 
 
 def window():
@@ -83,7 +84,7 @@ def window():
                 
                 global combo
                 combo = Combobox(master)
-                combo['values']= ("tag1", "tag2")
+                combo['values']= (list_keys)
                 combo.current(0) #set the selected item
                 combo.grid(column=0, row=3)
                 #print(combo.get())
@@ -93,27 +94,39 @@ def window():
                 button2 = Button(master, state=DISABLED, text="Unassign Tag", command=unassign_card)
                 button2.grid(column=0, row=5)
                 
-                
                 global val_unassign
                 
-                if card_data in tag_dictionary["tag1"]:
-                    print("Tag already assigned to card 1")
-                    lbl2.configure(text="Tag already assigned to card 1")
-                    val_unassign = "tag1"
-                    combo.grid_forget()
-                    button2.config(state="normal")
-
-                elif card_data in tag_dictionary["tag2"]:
-                    print("Tag already assigned to card 2")
-                    lbl2.configure(text="Tag already assigned to card 2")
-                    val_unassign = "tag2"
-                    combo.grid_forget()
-                    button2.config(state="normal")
+                for i in list_keys:
+                    if card_data in tag_dictionary[i]:
+                        
+                        print("Tag already assigned to " + i)
+                        lbl2.configure(text="Tag already assigned to " + i)
+                        val_unassign = i
+                        combo.grid_forget()
+                        button.grid_forget()
+                        button2.config(state="normal")
+                        break
+                
+#                 if card_data in tag_dictionary["tag1"]:
+#                     print("Tag already assigned to card 1")
+#                     lbl2.configure(text="Tag already assigned to card 1")
+#                     val_unassign = "tag1"
+#                     combo.grid_forget()
+#                     button2.config(state="normal")
+# 
+#                 elif card_data in tag_dictionary["tag2"]:
+#                     print("Tag already assigned to card 2")
+#                     lbl2.configure(text="Tag already assigned to card 2")
+#                     val_unassign = "tag2"
+#                     combo.grid_forget()
+#                     button2.config(state="normal")
 
                 else:
+                    print("No Break") 
                     print("Tag not currently assigned")
                     lbl2.configure(text="Tag found with UID: " + card_data)
                     button.config(state="normal")
+                    button2.grid_forget()
                     
             time.sleep(.1)
     
