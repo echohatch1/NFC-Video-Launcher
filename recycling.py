@@ -6,18 +6,37 @@ import os
 from threading import Thread
 import cv2
 import json
+from tkinter import *
+from PIL import Image, ImageTk 
 
-#OpenCV Implementation
+
+# #OpenCV Implementation
+# def open_img():
+#     img = cv2.imread("assets/images/recycling_home.png")
+# 
+#     cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+#     cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+#     
+#     cv2.imshow("window", img)
+#     
+#     cv2.waitKey()
+#     cv2.destroyAllWindows()
+
+#tkinter Implementation
 def open_img():
-    img = cv2.imread("assets/images/recycling_home.png")
+    global root
+    root=Tk()
+    root.geometry('1600x900')
+    root.title('Preparing')
+    root.attributes('-fullscreen', True)
 
-    cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-    cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+    imge=Image.open('assets/images/recycling_home_resized.png')
+    photo=ImageTk.PhotoImage(imge)
+
+    lab=Label (image=photo)
+    lab.pack()
     
-    cv2.imshow("window", img)
-    
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    root.mainloop()
     
 #display video after scanning
 def open_vid(vid):
@@ -52,6 +71,10 @@ def read_card():
                 print("card 2")
                 open_vid("assets/video/trash.mp4")
                 time.sleep(.1)
+            elif card_data in tag_dictionary["killtag"]:
+                print("closing")
+                root.destroy()
+                break
 
             else:
                 print("Card not recognized")
@@ -62,8 +85,7 @@ def read_card():
 if __name__ == '__main__':
     Thread(target = open_img).start()
     Thread(target = read_card).start()
-    
-    
+
     #usefull stuff
     #convert bytearray to hex
     #tag1Hex = tag1.hex()
