@@ -9,7 +9,7 @@ import json
 
 #OpenCV Implementation
 def open_img():
-    img = cv2.imread("recycling_home.png")
+    img = cv2.imread("assets/images/recycling_home.png")
 
     cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
     cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
@@ -27,33 +27,13 @@ def open_vid(vid):
 #listen for nfc cards    
 def read_card():
     
-    #convert bytearray to hex
-    #tag1Hex = tag1.hex()
-    
-    #convert hex to bytearray
-    #bytearray.fromhex(tag1Hex)
-    
     #get card data from json file (hex format)
     data = json.load(open('tagData.json'))
     
-    
-    #store data from json files into variables and convert from hex format
-    #tag1 = bytearray.fromhex(data["tag1"][0])
-    #tag2 = bytearray.fromhex(data["tag2"][0])
-    
-    #print (data["tags"][0]["tag1"][0])
     tag_dictionary = data["tags"][0]
-    #data_length = len(tag_dictionary)
-    
-    #for x in range(1, data_length + 1):
-        #array_length = len(tag_dictionary["tag" + str(x)])
-        #for j in range(0, array_length):
-            #print (tag_dictionary["tag" + str(x)][j])
-    
-    #tag1 = bytearray(b'K\x01\x01\x00\x04\x08\x04W \xdeR')
-    #tag2 = bytearray(b'K\x01\x01\x00\x04\x08\x04k\x90]\x1b')
         
     while True:
+        
         pn532 = Pn532_i2c()
         pn532.SAMconfigure()
 
@@ -65,17 +45,43 @@ def read_card():
         
             if card_data in tag_dictionary["tag1"]:
                 print("card 1")
-                #open_vid("sample.mp4")      
+                open_vid("assets/video/sample.mp4")
+                time.sleep(.1)
 
             elif card_data in tag_dictionary["tag2"]:
                 print("card 2")
-                #open_vid("trash.mp4")
+                open_vid("assets/video/trash.mp4")
+                time.sleep(.1)
 
             else:
                 print("Card not recognized")
-                time.sleep(5)
+                time.sleep(.1)
+        time.sleep(1)
 
 
 if __name__ == '__main__':
-    #Thread(target = open_img).start()
+    Thread(target = open_img).start()
     Thread(target = read_card).start()
+    
+    
+    #usefull stuff
+    #convert bytearray to hex
+    #tag1Hex = tag1.hex()
+    
+    #convert hex to bytearray
+    #bytearray.fromhex(tag1Hex)
+    
+    #store data from json files into variables and convert from hex format
+    #tag1 = bytearray.fromhex(data["tag1"][0])
+    #tag2 = bytearray.fromhex(data["tag2"][0])
+    
+    #print (data["tags"][0]["tag1"][0])
+    #data_length = len(tag_dictionary)
+    
+    #for x in range(1, data_length + 1):
+        #array_length = len(tag_dictionary["tag" + str(x)])
+        #for j in range(0, array_length):
+            #print (tag_dictionary["tag" + str(x)][j])
+    
+    #tag1 = bytearray(b'K\x01\x01\x00\x04\x08\x04W \xdeR')
+    #tag2 = bytearray(b'K\x01\x01\x00\x04\x08\x04k\x90]\x1b')
