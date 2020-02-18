@@ -14,7 +14,7 @@ jsonFile = open("tagData.json", "r") # Open the JSON file for reading
 data = json.load(jsonFile) # Read the JSON into the buffer
 jsonFile.close() # Close the JSON file
 
-tag_dictionary = data["tags"][0]
+tag_dictionary = data["tags"]
 combo = ""
 card_data = ""
 val_unassign = ""
@@ -34,7 +34,7 @@ def window():
     
 
     def assign_card():
-        data["tags"][0][combo.get()].append(card_data)
+        data["tags"][combo.get()]["uids"].append(card_data)
         
         ## Save our changes to JSON file
         jsonFile = open("tagData.json", "w+")
@@ -48,7 +48,7 @@ def window():
         window()
     
     def unassign_card():
-        data["tags"][0][val_unassign].remove(card_data)
+        data["tags"][val_unassign]["uids"].remove(card_data)
         
         ## Save our changes to JSON file
         jsonFile = open("tagData.json", "w+")
@@ -97,13 +97,14 @@ def window():
                 global val_unassign
                 
                 for i in list_keys:
-                    if card_data in tag_dictionary[i]:
+                    if card_data in tag_dictionary[i]["uids"]:
                         
                         print("Tag already assigned to " + i)
                         lbl2.configure(text="Tag already assigned to " + i)
                         val_unassign = i
                         combo.grid_forget()
-                        button.grid_forget()
+                        #button.grid_forget()
+                        button.config(state="disabled")
                         button2.config(state="normal")
                         break
                 
@@ -122,11 +123,11 @@ def window():
 #                     button2.config(state="normal")
 
                 else:
-                    print("No Break") 
                     print("Tag not currently assigned")
                     lbl2.configure(text="Tag found with UID: " + card_data)
                     button.config(state="normal")
-                    button2.grid_forget()
+                    button2.config(state="disabled")
+                    #button2.grid_forget()
                     
             time.sleep(.1)
     
