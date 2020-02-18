@@ -4,10 +4,14 @@ from py532lib.constants import *
 import time
 import os
 from threading import Thread
-import cv2
+#import cv2
 import json
 from tkinter import *
-from PIL import Image, ImageTk 
+from PIL import Image, ImageTk
+
+#omxplayer-wrapper
+from omxplayer.player import OMXPlayer
+from pathlib import Path
 
 
 # #OpenCV Implementation
@@ -40,47 +44,74 @@ def open_img():
     
 #display video after scanning
 def open_vid(vid):
-    command = "omxplayer " + vid
-    os.system(command)
+#     command = "omxplayer " + vid
+#     os.system(command)
+
+    #omxplayer-wrapper
+    player = OMXPlayer(vid)
+    sleep(5)
+    player.quit()
     
 #listen for nfc cards    
 def read_card():
     
     #get card data from json file (hex format)
-    data = json.load(open('tagData.json'))
+#     data = json.load(open('tagData.json'))
+#     data.close()
     
-    tag_dictionary = data["tags"][0]
+    jsonFile = open("tagData.json", "r") # Open the JSON file for reading
+    data = json.load(jsonFile) # Read the JSON into the buffer
+    jsonFile.close() # Close the JSON file
+    
+    tag_dictionary = data["tags"]
+    list_keys = list(tag_dictionary.keys())
+    
+
         
     while True:
-        
         pn532 = Pn532_i2c()
         pn532.SAMconfigure()
-
+        
         card_data = pn532.read_mifare().get_data().hex()
         
         if card_data != "4b00":
             
             print(card_data)
-        
-            if card_data in tag_dictionary["tag1"]:
-                print("card 1")
-                open_vid("assets/video/sample.mp4")
-                time.sleep(.1)
-
-            elif card_data in tag_dictionary["tag2"]:
-                print("card 2")
-                open_vid("assets/video/trash.mp4")
-                time.sleep(.1)
-            elif card_data in tag_dictionary["killtag"]:
-                print("closing")
-                root.destroy()
-                break
+            
+            for i in list_keys:
+                if card_data in tag_dictionary[i]["uids"]:
+                    print(i)
+                    if i != "killtag":
+                        open_vid("assets/video/" + tag_dictionary[i]["vid"])
+                    else:
+                        print("closing")
+                        command = "python3 add_tag.py"
+                        os.system(command)
+                        read_card()
+                        #root.destroy()
+                        #break
+                 
+#             if card_data in tag_dictionary["tag1"]["uids"]:
+#                 print("card 1")
+#                 open_vid("assets/video/sample.mp4")
+#                 time.sleep(.5)
+#                 continue
+# 
+#             elif card_data in tag_dictionary["tag2"]["uids"]:
+#                 print("card 2")
+#                 open_vid("assets/video/trash.mp4")
+#                 time.sleep(.5)
+#                 continue
+#             
+#             elif card_data in tag_dictionary["killtag"]["uids"]:
+#                 print("closing")
+#                 root.destroy()
+#                 break
 
             else:
                 print("Card not recognized")
-                time.sleep(.1)
-        time.sleep(1)
-
+                time.sleep(.5)
+                continue
 
 if __name__ == '__main__':
     Thread(target = open_img).start()
