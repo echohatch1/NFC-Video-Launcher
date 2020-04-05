@@ -16,48 +16,22 @@ from pathlib import Path
 global deviceValue
 deviceValue = "trash"
 
-# #OpenCV Implementation
-# def open_img():
-#     img = cv2.imread("assets/images/recycling_home.png")
-# 
-#     cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
-#     cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
-#     
-#     cv2.imshow("window", img)
-#     
-#     cv2.waitKey()
-#     cv2.destroyAllWindows()
+def open_background():
+    global root
+    root=Tk()
+    root.attributes('-fullscreen', True)
+    root.configure(bg='grey')
+    root.mainloop()
 
-#tkinter Implementation
-#def open_img():
-#     global root
-#     root=Tk()
-#     root.geometry('1600x900')
-#     root.title('Preparing')
-#     root.attributes('-fullscreen', True)
-# 
-#     imge=Image.open('assets/images/recycling_home_resized.png')
-#     photo=ImageTk.PhotoImage(imge)
-# 
-#     lab=Label (image=photo)
-#     lab.pack()
-#     
-#     root.mainloop()
-
-
-def open_img():
+def open_main_vid():
     global player
-    player = OMXPlayer('assets/video/wait_test.mp4', args='--loop')
-    sleep(5)
+    player = OMXPlayer('assets/video/wait_' + deviceValue + '.mp4', args='--loop')
+    sleep(2.5)
     
 #display video after scanning
-def open_vid(vid):
-#     command = "omxplayer " + vid
-#     os.system(command)
-
-    #omxplayer-wrapper
+def open_vid(vid, vid_length):
     player = OMXPlayer(vid)
-    sleep(5)
+    sleep(vid_length)
     player.quit()
     
 #listen for nfc cards    
@@ -90,19 +64,19 @@ def read_card():
                     print(i)
                     if i != "killtag":
                         if deviceValue == tag_dictionary[i]["category"]:
-                            open_vid("assets/video/" + tag_dictionary[i]["category"] + ".mp4")
-                            open_img()
+                            open_vid("assets/video/" + tag_dictionary[i]["category"] + ".mp4", 14)
+                            open_main_vid()
                             break
                         else:
-                            open_vid("assets/video/wrong.mp4")
-                            open_img()
+                            open_vid("assets/video/wrong.mp4", 6)
+                            open_main_vid()
                             break
                     else:
                         print("closing")
+                        player.quit()
                         #command = "python3 add_tag.py"
                         #os.system(command)
-                        #read_card()
-                        #root.destroy()
+                        root.destroy()
                         break
 
 
@@ -110,12 +84,14 @@ def read_card():
                 print("Card not recognized")
                 command = "python3 admin.py " + str(card_data)
                 os.system(command)
+                open_main_vid()
                 read_card()
                 #time.sleep(.5)
                 #continue
 
 if __name__ == '__main__':
-    Thread(target = open_img).start()
+    Thread(target = open_main_vid).start()
+    Thread(target = open_background).start()
     Thread(target = read_card).start()
 
     #usefull stuff
