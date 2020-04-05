@@ -4,7 +4,7 @@ from py532lib.constants import *
 import time
 import os
 from threading import Thread
-#import cv2
+import cv2
 import json
 from tkinter import *
 from PIL import Image, ImageTk
@@ -13,6 +13,8 @@ from PIL import Image, ImageTk
 from omxplayer.player import OMXPlayer
 from pathlib import Path
 
+global deviceValue
+deviceValue = "trash"
 
 # #OpenCV Implementation
 # def open_img():
@@ -27,20 +29,26 @@ from pathlib import Path
 #     cv2.destroyAllWindows()
 
 #tkinter Implementation
+#def open_img():
+#     global root
+#     root=Tk()
+#     root.geometry('1600x900')
+#     root.title('Preparing')
+#     root.attributes('-fullscreen', True)
+# 
+#     imge=Image.open('assets/images/recycling_home_resized.png')
+#     photo=ImageTk.PhotoImage(imge)
+# 
+#     lab=Label (image=photo)
+#     lab.pack()
+#     
+#     root.mainloop()
+
+
 def open_img():
-    global root
-    root=Tk()
-    root.geometry('1600x900')
-    root.title('Preparing')
-    root.attributes('-fullscreen', True)
-
-    imge=Image.open('assets/images/recycling_home_resized.png')
-    photo=ImageTk.PhotoImage(imge)
-
-    lab=Label (image=photo)
-    lab.pack()
-    
-    root.mainloop()
+    global player
+    player = OMXPlayer('assets/video/wait_test.mp4', args='--loop')
+    sleep(5)
     
 #display video after scanning
 def open_vid(vid):
@@ -59,15 +67,13 @@ def read_card():
 #     data = json.load(open('tagData.json'))
 #     data.close()
     
-    jsonFile = open("tagData.json", "r") # Open the JSON file for reading
+    jsonFile = open("shared/tagData.json", "r") # Open the JSON file for reading
     data = json.load(jsonFile) # Read the JSON into the buffer
     jsonFile.close() # Close the JSON file
     
     tag_dictionary = data["tags"]
     list_keys = list(tag_dictionary.keys())
-    
-
-        
+       
     while True:
         pn532 = Pn532_i2c()
         pn532.SAMconfigure()
@@ -77,41 +83,36 @@ def read_card():
         if card_data != "4b00":
             
             print(card_data)
+            player.quit()
             
             for i in list_keys:
                 if card_data in tag_dictionary[i]["uids"]:
                     print(i)
                     if i != "killtag":
-                        open_vid("assets/video/" + tag_dictionary[i]["vid"])
+                        if deviceValue == tag_dictionary[i]["category"]:
+                            open_vid("assets/video/" + tag_dictionary[i]["category"] + ".mp4")
+                            open_img()
+                            break
+                        else:
+                            open_vid("assets/video/wrong.mp4")
+                            open_img()
+                            break
                     else:
                         print("closing")
-                        command = "python3 add_tag.py"
-                        os.system(command)
-                        read_card()
+                        #command = "python3 add_tag.py"
+                        #os.system(command)
+                        #read_card()
                         #root.destroy()
-                        #break
-                 
-#             if card_data in tag_dictionary["tag1"]["uids"]:
-#                 print("card 1")
-#                 open_vid("assets/video/sample.mp4")
-#                 time.sleep(.5)
-#                 continue
-# 
-#             elif card_data in tag_dictionary["tag2"]["uids"]:
-#                 print("card 2")
-#                 open_vid("assets/video/trash.mp4")
-#                 time.sleep(.5)
-#                 continue
-#             
-#             elif card_data in tag_dictionary["killtag"]["uids"]:
-#                 print("closing")
-#                 root.destroy()
-#                 break
+                        break
+
 
             else:
                 print("Card not recognized")
-                time.sleep(.5)
-                continue
+                command = "python3 admin.py " + str(card_data)
+                os.system(command)
+                read_card()
+                #time.sleep(.5)
+                #continue
 
 if __name__ == '__main__':
     Thread(target = open_img).start()

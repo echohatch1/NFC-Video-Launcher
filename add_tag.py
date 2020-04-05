@@ -10,7 +10,7 @@ from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
 
-jsonFile = open("tagData.json", "r") # Open the JSON file for reading
+jsonFile = open("shared/tagData.json", "r") # Open the JSON file for reading
 data = json.load(jsonFile) # Read the JSON into the buffer
 jsonFile.close() # Close the JSON file
 
@@ -37,7 +37,7 @@ def window():
         data["tags"][combo.get()]["uids"].append(card_data)
         
         ## Save our changes to JSON file
-        jsonFile = open("tagData.json", "w+")
+        jsonFile = open("shared/tagData.json", "w+")
         jsonFile.write(json.dumps(data))
         jsonFile.close()
         
@@ -51,7 +51,7 @@ def window():
         data["tags"][val_unassign]["uids"].remove(card_data)
         
         ## Save our changes to JSON file
-        jsonFile = open("tagData.json", "w+")
+        jsonFile = open("shared/tagData.json", "w+")
         jsonFile.write(json.dumps(data))
         jsonFile.close()
         
