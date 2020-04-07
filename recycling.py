@@ -4,16 +4,13 @@ from py532lib.constants import *
 import time
 import os
 from threading import Thread
-import cv2
 import json
 from tkinter import *
-from PIL import Image, ImageTk
-
-#omxplayer-wrapper
 from omxplayer.player import OMXPlayer
 from pathlib import Path
 
 global deviceValue
+#set to "trash", "compost", or "recycling"
 deviceValue = "trash"
 
 def open_background():
@@ -36,11 +33,6 @@ def open_vid(vid, vid_length):
     
 #listen for nfc cards    
 def read_card():
-    
-    #get card data from json file (hex format)
-#     data = json.load(open('tagData.json'))
-#     data.close()
-    
     jsonFile = open("shared/tagData.json", "r") # Open the JSON file for reading
     data = json.load(jsonFile) # Read the JSON into the buffer
     jsonFile.close() # Close the JSON file
@@ -74,9 +66,9 @@ def read_card():
                     else:
                         print("closing")
                         player.quit()
+                        root.destroy()
                         #command = "python3 add_tag.py"
                         #os.system(command)
-                        root.destroy()
                         break
 
 
@@ -86,32 +78,8 @@ def read_card():
                 os.system(command)
                 open_main_vid()
                 read_card()
-                #time.sleep(.5)
-                #continue
 
 if __name__ == '__main__':
     Thread(target = open_main_vid).start()
     Thread(target = open_background).start()
     Thread(target = read_card).start()
-
-    #usefull stuff
-    #convert bytearray to hex
-    #tag1Hex = tag1.hex()
-    
-    #convert hex to bytearray
-    #bytearray.fromhex(tag1Hex)
-    
-    #store data from json files into variables and convert from hex format
-    #tag1 = bytearray.fromhex(data["tag1"][0])
-    #tag2 = bytearray.fromhex(data["tag2"][0])
-    
-    #print (data["tags"][0]["tag1"][0])
-    #data_length = len(tag_dictionary)
-    
-    #for x in range(1, data_length + 1):
-        #array_length = len(tag_dictionary["tag" + str(x)])
-        #for j in range(0, array_length):
-            #print (tag_dictionary["tag" + str(x)][j])
-    
-    #tag1 = bytearray(b'K\x01\x01\x00\x04\x08\x04W \xdeR')
-    #tag2 = bytearray(b'K\x01\x01\x00\x04\x08\x04k\x90]\x1b')
