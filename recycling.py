@@ -10,7 +10,7 @@ from pathlib import Path
 
 global deviceValue
 #set to "trash", "compost", or "recycle"
-deviceValue = "recycle"
+deviceValue = "test"
 
 def open_main_vid():
     global player
@@ -71,10 +71,17 @@ def read_card():
                     print("Player not running")
                 command = "python3 admin.py " + str(card_data)
                 os.system(command)
-                open_main_vid()
+                Thread(target = open_main_vid).start()
                 continue
         sleep(1)
 
 if __name__ == '__main__':
-    Thread(target = open_main_vid).start()
-    Thread(target = read_card).start()
+    try:
+        Thread(target = open_main_vid).start()
+        Thread(target = read_card).start()
+    except KeyboardInterrupt:
+        print('Interrupted')
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
