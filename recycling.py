@@ -10,7 +10,7 @@ from pathlib import Path
 
 global deviceValue
 #set to "trash", "compost", or "recycle"
-deviceValue = "test"
+deviceValue = "recycle"
 
 def open_main_vid():
     global player
@@ -30,7 +30,7 @@ def read_card():
     jsonFile.close() # Close the JSON file
     tag_dictionary = data["tags"]
     list_keys = list(tag_dictionary.keys())
-       
+        
     while True:
         pn532 = Pn532_i2c()
         pn532.SAMconfigure()
@@ -72,6 +72,12 @@ def read_card():
                 command = "python3 admin.py " + str(card_data)
                 os.system(command)
                 Thread(target = open_main_vid).start()
+                #get json data again
+                jsonFile = open("shared/tagData.json", "r") # Open the JSON file for reading
+                data = json.load(jsonFile) # Read the JSON into the buffer
+                jsonFile.close() # Close the JSON file
+                tag_dictionary = data["tags"]
+                list_keys = list(tag_dictionary.keys())
                 continue
         sleep(1)
 

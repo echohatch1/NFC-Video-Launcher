@@ -2,10 +2,12 @@ import tkinter as tk
 from tkinter import font  as tkfont
 import json
 import sys
-import time
-import os.path
+import os
 from os import path
 from PIL import ImageTk, Image
+from apscheduler.scheduler import Scheduler
+#from svglib.svglib import svg2rlg
+#from reportlab.graphics import renderPDF, renderPM
 
 #load object by running script like ' SCRIPTLOCATION/admin.py "variable" '
 if len(sys.argv) == 2:
@@ -14,18 +16,28 @@ else:
     objectToRegister = "undefined"
 
 #potential items and categories
-recycle = ["paper","cardboard","milk"]
-trash = ["rubber","bone","blade"]
-compost = ["flower","banana","egg"]
+recycle = ["bottle","soda","box"]
+trash = ["lightbulb","bone","skateboard"]
+compost = ["apple","banana","eggshell"]
 
 #empty variables to be set by program
 selectedCat = ""
 selectedItem = ""
 
+timeNum = 10
+firstTimeOut = 0
+
+sched = Scheduler()
+sched.start()
+
 #the greater window
 class SampleApp(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
+
+        #comment out next line to turn off fullscreen
+        #self.attributes("-fullscreen", True)
+
         self.title_font = tkfont.Font(family='Helvetica', size=18, weight="bold", slant="italic")
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
@@ -43,10 +55,23 @@ class SampleApp(tk.Tk):
         frame = self.frames[page_name]
         frame.tkraise()
         frame.event_generate("<<ShowFrame>>")
+    def murder(self):
+        os._exit(0)
 
 # option to register
 class StartPage(tk.Frame):
     def __init__(self, parent, controller):
+        def quit():
+            global timeNum
+            global firstTimeOut
+            if firstTimeOut == 0:
+                timeNum = timeNum - 1
+            closingMsg['text'] = "tool will close in "+str(timeNum)
+            if timeNum <= 0:
+                controller.murder()
+        def printit(self):
+            global timeNum
+            sched.add_interval_job(quit, seconds = 1)
         tk.Frame.__init__(self, parent)
         self.controller = controller
         load = Image.open("temp.gif")
@@ -60,9 +85,7 @@ class StartPage(tk.Frame):
         btn.pack()
         closingMsg = tk.Label(self, text="tool will close in 10", font=("Arial Bold", 30))
         closingMsg.pack()
-        self.bind("<<ShowFrame>>", self.on_show_frame)
-    def on_show_frame(self,event):
-        print("I am being shown...")
+        printit(self)
 
 #choose category
 class PageOne(tk.Frame):
@@ -77,24 +100,31 @@ class PageOne(tk.Frame):
         label = tk.Label(self, text="Object Category:", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
 
-        recycleImg = ImageTk.PhotoImage(Image.open("images/recycle.jpg"))
+        #recycleDraw = svg2rlg("Icons/recycle.svg")
+        #renderPM.drawToFile(recycleDraw, "recyc.png", fmt="PNG")
+        recycleImg = ImageTk.PhotoImage(Image.open("assets/images/recyc.png"))
         button = tk.Button(self, image=recycleImg, text="Recycle", command=lambda: nextPage(self,'recycle'))
         button.photo = recycleImg
         button.pack(side=tk.LEFT, expand=1, fill=tk.X)
 
-        trashImg = ImageTk.PhotoImage(Image.open("images/garbage.jpg"))
+        #trashDraw = svg2rlg("Icons/trash.svg")
+        #renderPM.drawToFile(trashDraw, "trash.png", fmt="PNG")
+        trashImg = ImageTk.PhotoImage(Image.open("assets/images/trash.png"))
         button2 = tk.Button(self, image=trashImg, text="Trash", command=lambda:nextPage(self,'trash'))
         button2.photo = trashImg
         button2.pack(side=tk.LEFT, expand=1, fill=tk.X)
 
-        compostImg = ImageTk.PhotoImage(Image.open("images/compost.jpg"))
+        #compDraw = svg2rlg("Icons/compost.svg")
+        #renderPM.drawToFile(compDraw, "comp.png", fmt="PNG")
+        compostImg = ImageTk.PhotoImage(Image.open("assets/images/comp.png"))
         button3 = tk.Button(self, image=compostImg, text="Compost", command=lambda:nextPage(self,'compost'))
         button3.photo = compostImg
         button3.pack(side=tk.LEFT, expand=1, fill=tk.X) 
           
         self.bind("<<ShowFrame>>", self.on_show_frame)
-    def on_show_frame(self,event):
-        print("I am being shown...")   
+    def on_show_frame(self,event): 
+        global firstTimeOut
+        firstTimeOut = 1
 
 #choose object
 class PageTwo(tk.Frame):
@@ -112,7 +142,9 @@ class PageTwo(tk.Frame):
                 currArray = compost
             for index, x in enumerate(currArray):
                 buttonArray[index]['text'] = x
-                recycleImg = ImageTk.PhotoImage(Image.open("images/"+x+".jpg"))
+                #compDraw = svg2rlg("Icons/"+x+".svg")
+                #renderPM.drawToFile(compDraw, x+".png", fmt="PNG")
+                recycleImg = ImageTk.PhotoImage(Image.open("assets/images/" + x + ".png"))
                 buttonArray[index]['image'] = recycleImg
                 buttonArray[index].photo = recycleImg
             label['text'] = ("which",selectedCat,"object?")
@@ -154,14 +186,31 @@ class PageTwo(tk.Frame):
 #success screen
 class PageThree(tk.Frame):
     def __init__(self, parent, controller):
+        def on_show_frame(self):
+            global timeNum
+            timeNum = 3
+            printit(self)
+        def quit():
+            global timeNum
+            global firstTimeOut
+            timeNum = timeNum - 1
+            closingMsg['text'] = "tool will close in "+str(timeNum)
+            if timeNum <= 0:
+                controller.murder()
+        def printit(self):
+            global timeNum
+            sched.add_interval_job(quit, seconds = 1)
         tk.Frame.__init__(self, parent)
         self.controller = controller
         label = tk.Label(self, text="Saved!", font=self.controller.title_font)
         label.pack(side="top", fill="x", pady=10)
+        closingMsg = tk.Label(self, text="tool will close in 3", font=("Arial Bold", 30))
+        closingMsg.pack()
+        self.bind("<<ShowFrame>>", on_show_frame)
         
 #checks if json exists, if it doesn't, creates it.
-if path.exists("shared/data.json"):
-    with open('shared/data.json') as json_file:
+if path.exists("data.json"):
+    with open('data.json') as json_file:
         data = json.load(json_file)
 else:
     data = {}
