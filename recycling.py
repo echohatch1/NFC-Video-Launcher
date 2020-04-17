@@ -10,7 +10,7 @@ from pathlib import Path
 
 global deviceValue
 #set to "trash", "compost", or "recycle"
-deviceValue = "recycle"
+deviceValue = "trash"
 
 def open_main_vid():
     global player
@@ -21,7 +21,10 @@ def open_main_vid():
 def open_vid(vid, vid_length):
     player2 = OMXPlayer(vid, args='--layer 2')
     sleep(vid_length)
-    player2.quit()
+#     try:
+#         player2.quit()
+#     except:
+#         print("Player 2 not running")
     
 #listen for nfc cards    
 def read_card():
@@ -64,7 +67,7 @@ def read_card():
                         break
 
             else:
-                print("Card not recognized")
+                print("Card not recognized. Launching admin console")
                 try:
                     player.quit()
                 except:
