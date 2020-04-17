@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Recycling
+Exec=python3 /home/pi/Documents/NFC-Video-Launcher-master/recycling.py
+Path=/home/pi/Documents/NFC-Video-Launcher-master
+Comment=App for recycling exhibit
+Icon=/home/pi/Documents/NFC-Video-Launcher-master/recycling.png
+Categories=System;
+Terminal=true
+X-KeepTerminal=true
