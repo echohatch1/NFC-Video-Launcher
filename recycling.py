@@ -25,14 +25,20 @@ def open_vid(vid, vid_length):
 #         player2.quit()
 #     except:
 #         print("Player 2 not running")
-    
-#listen for nfc cards    
-def read_card():
+
+#get data from json file
+def get_data():
+    global tag_dictionary
+    global list_keys
     jsonFile = open("shared/tagData.json", "r") # Open the JSON file for reading
     data = json.load(jsonFile) # Read the JSON into the buffer
     jsonFile.close() # Close the JSON file
     tag_dictionary = data["tags"]
     list_keys = list(tag_dictionary.keys())
+
+#listen for nfc cards    
+def read_card():
+    get_data()
         
     while True:
         pn532 = Pn532_i2c()
@@ -76,11 +82,7 @@ def read_card():
                 os.system(command)
                 Thread(target = open_main_vid).start()
                 #get json data again
-                jsonFile = open("shared/tagData.json", "r") # Open the JSON file for reading
-                data = json.load(jsonFile) # Read the JSON into the buffer
-                jsonFile.close() # Close the JSON file
-                tag_dictionary = data["tags"]
-                list_keys = list(tag_dictionary.keys())
+                get_data()
                 continue
         sleep(1)
 
