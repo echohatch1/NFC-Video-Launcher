@@ -10,7 +10,7 @@ from pathlib import Path
 
 global deviceValue
 #set to "trash", "compost", or "recycle"
-deviceValue = "recycle"
+deviceValue = "compost"
 
 def open_main_vid():
     global player

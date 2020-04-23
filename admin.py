@@ -99,6 +99,9 @@ class PageOne(tk.Frame):
         self.controller = controller
         label = tk.Label(self, text="Object Category:", font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
+        
+        bottomframe = tk.Frame(self)
+        bottomframe.pack(side="bottom")
 
         #recycleDraw = svg2rlg("Icons/recycle.svg")
         #renderPM.drawToFile(recycleDraw, "recyc.png", fmt="PNG")
@@ -119,7 +122,10 @@ class PageOne(tk.Frame):
         compostImg = ImageTk.PhotoImage(Image.open("assets/images/comp.png"))
         button3 = tk.Button(self, image=compostImg, text="Compost", command=lambda:nextPage(self,'compost'))
         button3.photo = compostImg
-        button3.pack(side=tk.LEFT, expand=1, fill=tk.X) 
+        button3.pack(side=tk.LEFT, expand=1, fill=tk.X)
+
+        button4 = tk.Button(bottomframe, text="cancel", font=("Arial Bold", 20), command=controller.murder)
+        button4.pack(side="left", anchor="sw",fill="y")
           
         self.bind("<<ShowFrame>>", self.on_show_frame)
     def on_show_frame(self,event): 
@@ -144,7 +150,7 @@ class PageTwo(tk.Frame):
                 buttonArray[index]['text'] = x
                 #compDraw = svg2rlg("Icons/"+x+".svg")
                 #renderPM.drawToFile(compDraw, x+".png", fmt="PNG")
-                recycleImg = ImageTk.PhotoImage(Image.open("assets/images/" + x + ".png"))
+                recycleImg = ImageTk.PhotoImage(Image.open("assets/images/"+x+".png"))
                 buttonArray[index]['image'] = recycleImg
                 buttonArray[index].photo = recycleImg
             label['text'] = ("which",selectedCat,"object?")
@@ -170,10 +176,16 @@ class PageTwo(tk.Frame):
 
             #loads next page
             self.controller.show_frame("PageThree")
+        def prevPage(self):
+            self.controller.show_frame("PageOne")
         tk.Frame.__init__(self, parent)
         self.controller = controller
         label = tk.Label(self, text="wild", font=self.controller.title_font)
         label.pack(side="top", fill="x", pady=10)
+        
+        bottomframe = tk.Frame(self)
+        bottomframe.pack(side="bottom")
+
         button = tk.Button(self, text="Go to the start page",command=lambda:saveObj(self,0))
         button.pack(side=tk.LEFT, expand=1, fill=tk.X)
         button2 = tk.Button(self, text="Go to the start page",command=lambda:saveObj(self,1))
@@ -181,6 +193,13 @@ class PageTwo(tk.Frame):
         button3 = tk.Button(self, text="Go to the start page",command=lambda:saveObj(self,2))
         button3.pack(side=tk.LEFT, expand=1, fill=tk.X)
         buttonArray = [button,button2,button3]
+
+        button5 = tk.Button(bottomframe, text="back", font=("Arial Bold", 20), command=lambda: prevPage(self))
+        button5.pack(side="left", anchor="sw",fill="y",padx='5')
+
+        button4 = tk.Button(bottomframe, text="cancel", font=("Arial Bold", 20), command=controller.murder)
+        button4.pack(side="left", anchor="sw",fill="y",padx='5')
+
         self.bind("<<ShowFrame>>", on_show_frame)
 
 #success screen
